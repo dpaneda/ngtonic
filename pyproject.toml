@@ -1,0 +1,100 @@
+[project]
+name = "ngtonic"
+version = "0.1.2"
+description = "Simple finances needs made simple"
+authors = [
+    {name = "Daniel Pañeda", email = "dpaneda@gmail.com"},
+]
+requires-python = ">=3.10"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+]
+readme = "README.md"
+license = {text = "MIT"}
+
+dependencies = [
+    "matplotlib",
+    "xlrd",
+    "unidecode",
+    "pyyaml>=6.0.2",
+    "pip>=25.0",
+    "typer>=0.15.1",
+    "fastclasses-json>=0.8.0",
+    "lazy-import>=0.2.2",
+    "pyqt6>=6.8.1",
+    "pre-commit>=4.2.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13.0",
+    "ruff>=0.8.1",
+    "vulture>=2.13",
+    "bpython",
+    "types-PyYAML",
+    "py-spy",
+    "pre-commit>=4.2.0",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "COM812", # Conflicts with the formatter
+    "FBT",    # TODO: Booleans on some functions that would need a small refactor
+    "ANN",    # TODO: It would be nice but we have a lot of missing annotations right now
+    "D"       # No need to have docstrings everywhere, not being a library
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+docstring-code-format = true
+docstring-code-line-length = 20
+
+
+[tool.pdm]
+distribution = true
+
+[[tool.pdm.source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[tool.pdm.scripts]
+lint = ["scripts/lint.sh"]
+format = ["scripts/format.sh"]
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project.scripts]
+ngtonic = "ngtonic.__main__:app"
