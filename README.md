@@ -40,7 +40,7 @@ pipx install ngtonic
 3. Import the movements:
 
 ```bash
-ngtonic import movements.xls
+ngtonic import ing movements.xls
 ```
 
 Your data is now stored locally in `.ngtonic/movements.json`. You can import multiple files; Ngtonic will automatically deduplicate the data.
@@ -50,13 +50,13 @@ Your data is now stored locally in `.ngtonic/movements.json`. You can import mul
 Ngtonic offers several commands:
 
 ```
-╭─ Commands ──────────────────────────────────────────────────────────────────────────────╮
-│ import         Import movements files to the internal storage (only ING is supported)   │
-│ list           Show a table listing the movements with optional filtering               │
-│ balance-plot   Plot the evolution of the balance over time                              │
-│ month-plot     Plot the movements grouped per month                                     │
-│ find-bills     Use a simple heuristic to find regular bills, like subscriptions         │
-╰─────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ──────────────────────────────────────────────────────────────────────╮
+│ import         Import movements files to the internal storage                   │
+│ list           Show a table listing the movements with optional filtering       │
+│ balance-plot   Plot the evolution of the balance over time                      │
+│ month-plot     Plot the movements grouped per month                             │
+│ find-bills     Use a simple heuristic to find regular bills, like subscriptions │
+╰─────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ```bash
@@ -98,6 +98,16 @@ ngtonic balance-plot
 ```
 <img src="examples/full_balance.png" width="600">
 
+## Instructions to export from supported sources
+
+### ING
+Go to the movements view of your account and download the excel format
+
+### Revolut
+On the web version, extract and choose excel format. Don't be surprised when you find that the file is, in fact, a CSV.
+
+### Paypal
+Go to activity, download, Completed payments. Choose CSV as the output format. PayPal movements are not directly imported, they are used to enrich the information.
 
 ## ⚙️ Configuration
 

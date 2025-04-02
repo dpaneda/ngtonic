@@ -1,12 +1,9 @@
-import csv
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
 import unidecode
-import xlrd  # type: ignore[import-untyped]
 import yaml
-from dateutil import parser
 from fastclasses_json import dataclass_json
 from rich.console import Console
 
@@ -24,6 +21,7 @@ class Movement:
     subcategory: str
     description: str
     value: float
+    paypal_info: str | None = None
 
 
 def fuzzy_match(needle, hay):
@@ -76,60 +74,6 @@ class Movements:
 
         # Sort by date and calculate balance over time
         self.sort()
-
-    @staticmethod
-    def import_files(files: list[Path]):
-        movements = Movements.load()
-        for path in files:
-            if path.is_file():
-                if path.suffix == ".csv":
-                    n = movements.import_from_revolut(path)
-                    console.print(f"Imported {n} movements from file {path} using the Revolut importer")
-                elif path.suffix == ".xls":
-                    n = movements.import_from_ing(path)
-                    console.print(f"Imported {n} movements from file {path} using the ING importer")
-                else:
-                    console.print(f"[ERROR] The file {path} is not supported")
-            else:
-                console.print(f"[ERROR] The file {path} does not exists")
-        movements.save()
-
-    def import_from_ing(self, file_name: Path) -> int:
-        """Import movements from an XLS file exported from ING"""
-        book = xlrd.open_workbook(file_name)
-        sh = book.sheet_by_index(0)
-        initial_size = len(self.movements)
-        for rx in range(sh.nrows):
-            # Seek the movements
-            cell = sh[rx]
-            if cell[0].ctype != xlrd.XL_CELL_DATE:
-                continue
-
-            # Extract a date from the cell
-            movement_date = xlrd.xldate.xldate_as_datetime(cell[0].value, 0).date()
-            move = Movement(movement_date, cell[1].value, cell[2].value, cell[3].value, cell[6].value)
-
-            # Skip duplicated movement
-            if move in self.movements:
-                continue
-            self.movements.append(move)
-        return len(self.movements) - initial_size
-
-    def import_from_revolut(self, file_name: Path) -> int:
-        """Import movements from a CSV file exported from Revolut"""
-        reader = csv.DictReader(file_name.open(), delimiter=",")
-        initial_size = len(self.movements)
-        for row in reader:
-            if row["Type"] != "CARD_PAYMENT":
-                # We are only interested in card payments
-                continue
-            movement_date = parser.parse(row["Started Date"]).date()
-            move = Movement(movement_date, "Unknown", "Unknown", row["Description"], float(row["Amount"]))
-            # Skip duplicated movement
-            if move in self.movements:
-                continue
-            self.movements.append(move)
-        return len(self.movements) - initial_size
 
     def filter_by_field(self, field, needle):
         self.movements = [m for m in self.movements if fuzzy_match(needle, getattr(m, field))]

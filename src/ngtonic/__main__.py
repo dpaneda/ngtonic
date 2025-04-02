@@ -7,6 +7,7 @@ import typer
 from rich.console import Console
 
 from .bills import RegularBills
+from .importer import Importer, ImportSource
 from .movements import Movements
 from .plotter import Plotter
 from .printer import Printer
@@ -41,9 +42,9 @@ ConfigFile = Annotated[str, typer.Option("--config", "-o", help="Config file pat
 
 
 @app.command("import")
-def import_movements(files: list[Path]):
-    """Import movements files to the internal storage (only ING is supported)"""
-    Movements.import_files(files)
+def import_movements(source: ImportSource, files: list[Path]):
+    """Import movements files to the internal storage"""
+    Importer.import_files(source, files)
 
 
 @app.command("list")

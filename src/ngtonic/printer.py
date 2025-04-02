@@ -27,7 +27,10 @@ class Printer:
         )
 
         for m in movements.movements:
-            table.add_row(str(m.date), m.category, m.subcategory, m.description, str(m.value))
+            description = m.description
+            if m.paypal_info:
+                description = f"Paypal ({m.paypal_info})"
+            table.add_row(str(m.date), m.category, m.subcategory, description, str(m.value))
         console.print(table)
         console.print(f"Printed {len(table.rows)} movements")
 
