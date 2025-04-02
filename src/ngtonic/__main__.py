@@ -8,7 +8,7 @@ from rich.console import Console
 
 from .bills import RegularBills
 from .importer import Importer, ImportSource
-from .movements import Movements
+from .movements import MovementFilter, MovementFilterType, Movements
 from .plotter import Plotter
 from .printer import Printer
 
@@ -21,12 +21,22 @@ def abort(message: str):
     raise typer.Exit(1)
 
 
-def load_and_filter_movements(category, description, incomes, expenses):
+def load_and_filter_movements(categories, descriptions, incomes, expenses):
     m = Movements.load()
     if not m.movements:
         abort("The movements file is empty, you need to import some data first")
 
-    m.filter(category, description, incomes, expenses)
+    movement_filters = []
+    if categories:
+        movement_filters += [MovementFilter(MovementFilterType.CATEGORY, value) for value in categories]
+    if descriptions:
+        movement_filters += [MovementFilter(MovementFilterType.DESCRIPTION, value) for value in descriptions]
+    if incomes:
+        movement_filters.append(MovementFilter(MovementFilterType.INCOME))
+    if expenses:
+        movement_filters.append(MovementFilter(MovementFilterType.EXPENSE))
+    m.filter(movement_filters)
+
     if not m.movements:
         abort("You filter out all movements, chech your filters")
     return m
@@ -49,15 +59,14 @@ def import_movements(source: ImportSource, files: list[Path]):
 
 @app.command("list")
 def list_movements(
-    category: Category = None,
-    description: Description = None,
+    categories: Category = None,
+    descriptions: Description = None,
     incomes: Incomes = False,
     expenses: Expenses = False,
     month_group: MonthGroup = False,
 ):
     """Show a table listing the movements with optional filtering"""
-    movements = load_and_filter_movements(category, description, incomes, expenses)
-
+    movements = load_and_filter_movements(categories, descriptions, incomes, expenses)
     if month_group:
         Printer.list_movements_per_month(movements)
     else:
@@ -66,25 +75,25 @@ def list_movements(
 
 @app.command()
 def balance_plot(
-    category: Category = None,
-    description: Description = None,
+    categories: Category = None,
+    descriptions: Description = None,
     incomes: Incomes = False,
     expenses: Expenses = False,
 ):
     """Plot the evolution of the balance over time"""
-    movements = load_and_filter_movements(category, description, incomes, expenses)
+    movements = load_and_filter_movements(categories, descriptions, incomes, expenses)
     Plotter.show_balance_over_time(movements)
 
 
 @app.command()
 def month_plot(
-    category: Category = None,
-    description: Description = None,
+    categories: Category = None,
+    descriptions: Description = None,
     incomes: Incomes = False,
     expenses: Expenses = False,
 ):
     """Plot the movements grouped per month"""
-    movements = load_and_filter_movements(category, description, incomes, expenses)
+    movements = load_and_filter_movements(categories, descriptions, incomes, expenses)
     Plotter.show_movements_per_month(movements)
 
 

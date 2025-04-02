@@ -52,7 +52,6 @@ line-length = 120
 select = ["ALL"]
 ignore = [
     "COM812", # Conflicts with the formatter
-    "FBT",    # TODO: Booleans on some functions that would need a small refactor
     "ANN",    # TODO: It would be nice but we have a lot of missing annotations right now
     "D"       # No need to have docstrings everywhere, not being a library
 ]
@@ -63,6 +62,10 @@ unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+# Is completely ok to have boolean parameters
+"src/ngtonic/__main__.py" = ["FBT002"]
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.

@@ -23,16 +23,16 @@ class RegularBills:
 
     bills: dict[str, RegularBill]
 
-    def __init__(self, movs: Movements):
+    def __init__(self, moves: Movements):
         def valid_expense(e):
             period = (e.info.date - e.start_date) / e.hits
             return 22 < period.days < 32 and not e.ignore  # noqa: PLR2004
 
-        movs.filter_expenses()
-        movs.sort()
+        moves.movements = [m for m in moves.movements if m.value < 0]
+        moves.sort()
         expenses = {}
 
-        for m in movs.movements:
+        for m in moves.movements:
             if m.description not in expenses:
                 expenses[m.description] = RegularBill(m, m.date, 1, m.value)
             else:
