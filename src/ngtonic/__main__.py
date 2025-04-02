@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -21,7 +22,7 @@ def abort(message: str):
     raise typer.Exit(1)
 
 
-def load_and_filter_movements(categories, descriptions, incomes, expenses):
+def load_and_filter_movements(categories, descriptions, incomes, expenses, start_date, end_date):
     m = Movements.load()
     if not m.movements:
         abort("The movements file is empty, you need to import some data first")
@@ -35,6 +36,10 @@ def load_and_filter_movements(categories, descriptions, incomes, expenses):
         movement_filters.append(MovementFilter(MovementFilterType.INCOME))
     if expenses:
         movement_filters.append(MovementFilter(MovementFilterType.EXPENSE))
+    if start_date:
+        movement_filters.append(MovementFilter(MovementFilterType.START_DATE, start_date))
+    if end_date:
+        movement_filters.append(MovementFilter(MovementFilterType.END_DATE, end_date))
     m.filter(movement_filters)
 
     if not m.movements:
@@ -47,6 +52,8 @@ Category = Annotated[list[str] | None, typer.Option("--category", "-c", help="Fi
 Description = Annotated[list[str] | None, typer.Option("--description", "-d", help="Filter by description")]
 Incomes = Annotated[bool, typer.Option("--incomes", "-i", help="Show only incomes (positive transactions)")]
 Expenses = Annotated[bool, typer.Option("--expenses", "-e", help="Show only incomes (positive transactions)")]
+StartDate = Annotated[datetime | None, typer.Option("--start-date", "-s", help="Show transactions after this date")]
+EndDate = Annotated[datetime | None, typer.Option("--end-date", "-n", help="Show transactions before this date")]
 MonthGroup = Annotated[bool, typer.Option("--group-by-month", "-m", help="Group transactions by month")]
 ConfigFile = Annotated[str, typer.Option("--config", "-o", help="Config file path")]
 
@@ -63,10 +70,12 @@ def list_movements(
     descriptions: Description = None,
     incomes: Incomes = False,
     expenses: Expenses = False,
+    start_date: StartDate = None,
+    end_date: EndDate = None,
     month_group: MonthGroup = False,
 ):
     """Show a table listing the movements with optional filtering"""
-    movements = load_and_filter_movements(categories, descriptions, incomes, expenses)
+    movements = load_and_filter_movements(categories, descriptions, incomes, expenses, start_date, end_date)
     if month_group:
         Printer.list_movements_per_month(movements)
     else:
@@ -79,9 +88,11 @@ def balance_plot(
     descriptions: Description = None,
     incomes: Incomes = False,
     expenses: Expenses = False,
+    start_date: StartDate = None,
+    end_date: EndDate = None,
 ):
     """Plot the evolution of the balance over time"""
-    movements = load_and_filter_movements(categories, descriptions, incomes, expenses)
+    movements = load_and_filter_movements(categories, descriptions, incomes, expenses, start_date, end_date)
     Plotter.show_balance_over_time(movements)
 
 
@@ -91,9 +102,11 @@ def month_plot(
     descriptions: Description = None,
     incomes: Incomes = False,
     expenses: Expenses = False,
+    start_date: StartDate = None,
+    end_date: EndDate = None,
 ):
     """Plot the movements grouped per month"""
-    movements = load_and_filter_movements(categories, descriptions, incomes, expenses)
+    movements = load_and_filter_movements(categories, descriptions, incomes, expenses, start_date, end_date)
     Plotter.show_movements_per_month(movements)
 
 

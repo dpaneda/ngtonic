@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 from enum import Enum
 from pathlib import Path
 
@@ -39,12 +39,14 @@ class MovementFilterType(Enum):
     INCOME = "income"
     EXPENSE = "expense"
     VALUE = "value"
+    START_DATE = "start_date"
+    END_DATE = "end_date"
 
 
 @dataclass
 class MovementFilter:
     filter_type: MovementFilterType
-    filter_value: str | None = None
+    filter_value: str | datetime | None = None
 
     def is_match(self, movement: Movement):  # noqa: PLR0911
         match self.filter_type:
@@ -60,6 +62,10 @@ class MovementFilter:
                 return movement.value < 0
             case MovementFilterType.VALUE:
                 return movement.value == float(self.filter_value)  # type: ignore[arg-type]
+            case MovementFilterType.START_DATE:
+                return movement.date >= self.filter_value.date()  # type: ignore[union-attr]
+            case MovementFilterType.END_DATE:
+                return movement.date <= self.filter_value.date()  # type: ignore[union-attr]
             case _:
                 console.print(f"[ERROR] Unknown filter type: {self.filter_type}")
                 return False
