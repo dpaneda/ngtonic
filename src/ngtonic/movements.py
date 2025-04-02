@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import date
+from enum import Enum
 from pathlib import Path
 
 import unidecode
@@ -31,6 +32,39 @@ def fuzzy_match(needle, hay):
     return normalize(needle) in normalize(hay)
 
 
+class MovementFilterType(Enum):
+    CATEGORY = "category"
+    SUBCATEGORY = "subcategory"
+    DESCRIPTION = "description"
+    INCOME = "income"
+    EXPENSE = "expense"
+    VALUE = "value"
+
+
+@dataclass
+class MovementFilter:
+    filter_type: MovementFilterType
+    filter_value: str | None = None
+
+    def is_match(self, movement: Movement):  # noqa: PLR0911
+        match self.filter_type:
+            case MovementFilterType.CATEGORY:
+                return fuzzy_match(self.filter_value, movement.category)
+            case MovementFilterType.SUBCATEGORY:
+                return fuzzy_match(self.filter_value, movement.subcategory)
+            case MovementFilterType.DESCRIPTION:
+                return fuzzy_match(self.filter_value, movement.description)
+            case MovementFilterType.INCOME:
+                return movement.value > 0
+            case MovementFilterType.EXPENSE:
+                return movement.value < 0
+            case MovementFilterType.VALUE:
+                return movement.value == float(self.filter_value)  # type: ignore[arg-type]
+            case _:
+                console.print(f"[ERROR] Unknown filter type: {self.filter_type}")
+                return False
+
+
 @dataclass_json
 @dataclass
 class Movements:
@@ -52,20 +86,8 @@ class Movements:
             jm = self.to_json()
             f.write(jm)
 
-    def filter(self, category: list[str] | None, description: list[str] | None, incomes: bool, expenses: bool):
-        if description is None:
-            description = []
-        if category is None:
-            category = []
-
-        for needle in category:
-            self.filter_by_field("category", needle)
-        for needle in description:
-            self.filter_by_field("description", needle)
-        if incomes:
-            self.filter_incomes()
-        if expenses:
-            self.filter_expenses()
+    def filter(self, filters: list[MovementFilter]):
+        self.movements = [m for m in self.movements if all(f.is_match(m) for f in filters)]
 
         if user_config.is_file():
             with user_config.open() as f:
@@ -75,26 +97,12 @@ class Movements:
         # Sort by date and calculate balance over time
         self.sort()
 
-    def filter_by_field(self, field, needle):
-        self.movements = [m for m in self.movements if fuzzy_match(needle, getattr(m, field))]
-
-    def filter_incomes(self):
-        self.movements = [m for m in self.movements if m.value > 0]
-
-    def filter_expenses(self):
-        self.movements = [m for m in self.movements if m.value < 0]
-
     def filter_exclusions(self, exclusions):
         def match_exclusion(exclusion, m):
+            exclusion_filters = []
             for field, value in exclusion.items():
-                match field:
-                    case "category" | "subcategory" | "description":
-                        if not fuzzy_match(value, getattr(m, field)):
-                            return False
-                    case "value":
-                        if value != m.value:
-                            return False
-            return True
+                exclusion_filters.append(MovementFilter(MovementFilterType(field), value))
+            return all(f.is_match(m) for f in exclusion_filters)
 
         def should_exclude(m):
             return any(match_exclusion(e, m) for e in exclusions)
