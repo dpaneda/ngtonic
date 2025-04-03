@@ -52,8 +52,8 @@ Category = Annotated[list[str] | None, typer.Option("--category", "-c", help="Fi
 Description = Annotated[list[str] | None, typer.Option("--description", "-d", help="Filter by description")]
 Incomes = Annotated[bool, typer.Option("--incomes", "-i", help="Show only incomes (positive transactions)")]
 Expenses = Annotated[bool, typer.Option("--expenses", "-e", help="Show only incomes (positive transactions)")]
-StartDate = Annotated[datetime | None, typer.Option("--start-date", "-s", help="Show transactions after this date")]
-EndDate = Annotated[datetime | None, typer.Option("--end-date", "-n", help="Show transactions before this date")]
+StartDate = Annotated[datetime | None, typer.Option("--from", "-f", help="Show transactions after this date")]
+EndDate = Annotated[datetime | None, typer.Option("--to", "-t", help="Show transactions before this date")]
 MonthGroup = Annotated[bool, typer.Option("--group-by-month", "-m", help="Group transactions by month")]
 ConfigFile = Annotated[str, typer.Option("--config", "-o", help="Config file path")]
 
