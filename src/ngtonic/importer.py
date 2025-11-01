@@ -69,7 +69,7 @@ class Importer:
         """Parse movements from a CSV file exported from Revolut"""
         reader = csv.DictReader(file_name.open(), delimiter=",")
         for row in reader:
-            if row["Type"] != "CARD_PAYMENT":
+            if row["Type"] in ("CARD_PAYMENT", "Card Payment"):
                 # We are only interested in card payments
                 continue
             movement_date = parser.parse(row["Started Date"]).date()
