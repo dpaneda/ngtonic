@@ -1,6 +1,6 @@
 [project]
 name = "ngtonic"
-version = "1.0.0"
+version = "1.0.1"
 description = "Personal finances on your terminal"
 authors = [
     {name = "Daniel Pañeda", email = "dpaneda@gmail.com"},
