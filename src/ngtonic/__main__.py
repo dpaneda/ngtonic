@@ -43,7 +43,7 @@ def load_and_filter_movements(categories, descriptions, incomes, expenses, start
     m.filter(movement_filters)
 
     if not m.movements:
-        abort("You filter out all movements, chech your filters")
+        abort("You filter out all movements, check your filters")
     return m
 
 
@@ -51,7 +51,7 @@ def load_and_filter_movements(categories, descriptions, incomes, expenses, start
 Category = Annotated[list[str] | None, typer.Option("--category", "-c", help="Filter by category")]
 Description = Annotated[list[str] | None, typer.Option("--description", "-d", help="Filter by description")]
 Incomes = Annotated[bool, typer.Option("--incomes", "-i", help="Show only incomes (positive transactions)")]
-Expenses = Annotated[bool, typer.Option("--expenses", "-e", help="Show only incomes (positive transactions)")]
+Expenses = Annotated[bool, typer.Option("--expenses", "-e", help="Show only expenses (negative transactions)")]
 StartDate = Annotated[datetime | None, typer.Option("--from", "-f", help="Show transactions after this date")]
 EndDate = Annotated[datetime | None, typer.Option("--to", "-t", help="Show transactions before this date")]
 MonthGroup = Annotated[bool, typer.Option("--group-by-month", "-m", help="Group transactions by month")]

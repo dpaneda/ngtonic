@@ -98,7 +98,8 @@ class Movements:
         if user_config.is_file():
             with user_config.open() as f:
                 config = yaml.safe_load(f)
-                self.filter_exclusions(config["excluded_movements"])
+                if "excluded_movements" in config:
+                    self.filter_exclusions(config["excluded_movements"])
 
         # Sort by date and calculate balance over time
         self.sort()
