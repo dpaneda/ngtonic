@@ -26,7 +26,7 @@ class Plotter:
         y = list(moves_per_month.values())
 
         y_mean = running_mean(y, 5)
-        fig, ax = plt.subplots()
+        _, ax = plt.subplots()
         ax.bar(x, y, width=25)
         plt.plot(x, y_mean, "r.-", label="Moving average")
         plt.xlabel("Time")
@@ -41,7 +41,7 @@ class Plotter:
         x = moves_per_day.keys()
         y = moves_per_day.values()
 
-        fig, ax = plt.subplots()
+        _, ax = plt.subplots()
         ax.plot(x, y)
         ax.fill_between(x, y, alpha=0.5)
         ax.plot(x, y, color="k", linewidth=0.5)

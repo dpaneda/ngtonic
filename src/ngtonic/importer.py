@@ -53,23 +53,37 @@ class Importer:
     def parse_ing_file(file_name: Path):
         """Parse movements from an XLS file exported from ING"""
         book = xlrd.open_workbook(file_name)
-        sh = book.sheet_by_index(0)
-        for rx in range(sh.nrows):
+        rows = book.sheet_by_index(0)
+        # Very ugly way to do this and tied to spanish but not easy to do otherwise
+        if [m.value for m in rows[3]] != [
+            "F. VALOR",
+            "CATEGORÍA",
+            "SUBCATEGORÍA",
+            "DESCRIPCIÓN",
+            "COMENTARIO",
+            "IMPORTE (€)",
+            "SALDO (€)",
+        ]:
+            console.print(f"[ERROR] The file {file_name} does not seem to be a valid ING export")
+            return
+
+        for rx in range(rows.nrows):
             # Seek the movements
-            cell = sh[rx]
+            cell = rows[rx]
             if cell[0].ctype != xlrd.XL_CELL_DATE:
                 continue
 
             # Extract a date from the cell
             movement_date = xlrd.xldate.xldate_as_datetime(cell[0].value, 0).date()
-            yield Movement(movement_date, cell[1].value, cell[2].value, cell[3].value, cell[6].value)
+            m = Movement(movement_date, cell[1].value, cell[2].value, cell[3].value, cell[5].value)
+            yield m
 
     @staticmethod
     def parse_revolut_file(file_name: Path):
         """Parse movements from a CSV file exported from Revolut"""
         reader = csv.DictReader(file_name.open(), delimiter=",")
         for row in reader:
-            if row["Type"] in ("CARD_PAYMENT", "Card Payment"):
+            if row["Type"] not in ("CARD_PAYMENT", "Card Payment"):
                 # We are only interested in card payments
                 continue
             movement_date = parser.parse(row["Started Date"]).date()
